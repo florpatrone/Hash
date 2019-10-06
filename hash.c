@@ -5,6 +5,9 @@
 #include <stdbool.h>
 #include <string.h>
 
+#define FACTOR_CARGA 2
+#define CAPACIDAD_INICIAL 37
+
 /* Definición del struct campo */
 typedef struct campo {
     char* clave;
@@ -19,6 +22,8 @@ struct hash {
     hash_destruir_dato_t* funcion_destruccion;
 };
 
+/* Funciones auxiliares */
+
 unsigned long funcion_hash(char *str, size_t cantidad) { //Utiliza el algoritmo 'djb2'
     unsigned long hash = 5381;
     int c;
@@ -28,6 +33,18 @@ unsigned long funcion_hash(char *str, size_t cantidad) { //Utiliza el algoritmo 
     
     return hash%cantidad;
 }
+
+/* bool hash_redimensionar_capacidad(hash_t *hash, size_t (*operacion) (hash_t*)){
+
+} */
+
+/* size_t aumentar_capacidad(hash_t *hash){
+
+} */
+
+/* size_t reducir_capacidad(hash_t *hash){
+
+} */
 
 /* Primitivas del hash */
 

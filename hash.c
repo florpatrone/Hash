@@ -1,7 +1,9 @@
+#define _POSIX_C_SOURCE 200809L 
 #include "hash.h"
 #include "lista.h"
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 /* Definición del struct campo */
 typedef struct campo {

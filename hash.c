@@ -75,3 +75,16 @@ unsigned long funcion_hash(char *str, size_t cantidad) { //Utiliza el algoritmo 
 /* void hash_destruir(hash_t *hash){
 
 } */
+
+/* Primitivas del campo */
+
+campo_t* campo_crear(char *clave, void *dato){
+    campo_t* campo = malloc(sizeof(campo_t));
+
+    if (campo == NULL) return NULL;
+    
+    campo->clave = clave;
+    campo->valor = dato;
+
+    return campo;
+}

@@ -16,7 +16,7 @@ typedef struct campo {
 
 /* Definición del struct hash */
 struct hash {
-    lista_t** lista;
+    lista_t** baldes;
     size_t capacidad;
     size_t cantidad;
     hash_destruir_dato_t* funcion_destruccion;

@@ -52,9 +52,31 @@ unsigned long funcion_hash(char *str, size_t cantidad) { //Utiliza el algoritmo 
 
 } */
 
-/* bool hash_guardar(hash_t *hash, const char *clave, void *dato){
+bool hash_guardar(hash_t *hash, const char *clave, void *dato){
+    if ((hash->cantidad / hash->capacidad) >= FACTOR_CARGA){
+        if (!hash_redimensionar_capacidad(hash,aumentar_capacidad)) return false;
+    } 
 
-} */
+    char* copia_clave = strdup(clave);
+    campo_t* campo = campo_crear(copia_clave,dato);
+
+    if (campo == NULL){
+       free(copia_clave);
+       return false;
+    }
+
+    size_t num_hash = funcion_hash(copia_clave,hash->capacidad);
+    lista_t* balde = hash->baldes[num_hash];
+
+    if (!lista_insertar_ultimo(balde,campo)){
+       free(copia_clave);
+       free(campo);
+       return false;
+    }
+
+    hash->cantidad++;
+    return true;
+}
 
 /* void *hash_borrar(hash_t *hash, const char *clave){
 

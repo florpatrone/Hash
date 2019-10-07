@@ -110,9 +110,20 @@ bool hash_pertenece(const hash_t *hash, const char *clave){
 
 } */
 
-/* void hash_destruir(hash_t *hash){
+void hash_destruir(hash_t *hash){
+    hash_destruir_dato_t funcion_destruccion = *(hash->funcion_destruccion);
 
-} */
+    for (int i = 0; i < hash->capacidad ; i++){
+        lista_t* balde = hash->baldes[i];
+
+        while (!lista_esta_vacia(balde)){
+            campo_t* campo = lista_borrar_primero(balde);
+            campo_destruir(campo,funcion_destruccion);
+        }
+    }
+    
+    free(hash);
+}
 
 /* Primitivas del campo */
 

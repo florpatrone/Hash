@@ -86,9 +86,25 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato){
 
 } */
 
-/* bool hash_pertenece(const hash_t *hash, const char *clave){
+bool hash_pertenece(const hash_t *hash, const char *clave){
+    size_t num_hash = funcion_hash(clave,hash->capacidad);
+    lista_t* balde = hash->baldes[num_hash];
+    lista_iter_t* iterador = lista_iter_crear(balde);
 
-} */
+    if (iterador == NULL) return false; //falso negativo
+
+    while (!lista_iter_al_final(iterador)){
+        campo_t* campo = lista_iter_ver_actual(iterador);
+        
+        if (strcmp(campo->clave,clave) == 0){
+            lista_iter_destruir(iterador);
+            return true;
+        }
+    }
+
+    lista_iter_destruir(iterador);
+    return false;
+}
 
 /* size_t hash_cantidad(const hash_t *hash){
 

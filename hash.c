@@ -137,3 +137,9 @@ campo_t* campo_crear(char *clave, void *dato){
 
     return campo;
 }
+
+void campo_destruir(campo_t* campo, void destruir_dato(void*)){
+    if (destruir_dato != NULL) destruir_dato(campo->valor);
+    free(campo->clave);
+    free(campo);
+}

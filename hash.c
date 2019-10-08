@@ -19,7 +19,7 @@ struct hash {
     lista_t** baldes;
     size_t capacidad;
     size_t cantidad;
-    hash_destruir_dato_t* funcion_destruccion;
+    hash_destruir_dato_t funcion_destruccion;
 };
 
 /* Funciones auxiliares */

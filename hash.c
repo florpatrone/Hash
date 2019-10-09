@@ -98,6 +98,9 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato){
 bool hash_pertenece(const hash_t *hash, const char *clave){
     size_t num_hash = funcion_hash(clave,hash->capacidad);
     lista_t* balde = hash->baldes[num_hash];
+
+    if (balde == NULL) return false;
+
     lista_iter_t* iterador = lista_iter_crear(balde);
 
     if (iterador == NULL) return false; //falso negativo
@@ -120,7 +123,7 @@ bool hash_pertenece(const hash_t *hash, const char *clave){
 } */
 
 void hash_destruir(hash_t *hash){
-    hash_destruir_dato_t funcion_destruccion = *(hash->funcion_destruccion);
+    hash_destruir_dato_t funcion_destruccion = hash->funcion_destruccion;
 
     for (int i = 0; i < hash->capacidad ; i++){
         lista_t* balde = hash->baldes[i];

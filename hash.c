@@ -61,6 +61,9 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato){
     } 
 
     char* copia_clave = strdup(clave);
+
+    if (copia_clave == NULL) return false;
+
     campo_t* campo = campo_crear(copia_clave,dato);
 
     if (campo == NULL){
@@ -71,10 +74,13 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato){
     size_t num_hash = funcion_hash(copia_clave,hash->capacidad);
     lista_t* balde = hash->baldes[num_hash];
 
-    if (!lista_insertar_ultimo(balde,campo)){
-       free(copia_clave);
-       free(campo);
-       return false;
+    if (balde == NULL){
+        hash->baldes[num_hash] = lista_crear();
+
+    if ( (balde == NULL) || (!lista_insertar_ultimo(balde,campo)) ){
+        campo_destruir(campo,hash->funcion_destruccion);
+        return false;
+        }
     }
 
     hash->cantidad++;

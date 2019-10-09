@@ -128,6 +128,8 @@ void hash_destruir(hash_t *hash){
     for (int i = 0; i < hash->capacidad ; i++){
         lista_t* balde = hash->baldes[i];
 
+        if (balde == NULL) continue;
+
         while (!lista_esta_vacia(balde)){
             campo_t* campo = lista_borrar_primero(balde);
             campo_destruir(campo,funcion_destruccion);

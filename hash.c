@@ -19,13 +19,16 @@ struct hash {
     lista_t** baldes;
     size_t capacidad;
     size_t cantidad;
-    hash_destruir_dato_t* funcion_destruccion;
+    hash_destruir_dato_t funcion_destruccion;
 };
 
 /* Funciones auxiliares */
 
-unsigned long funcion_hash(char *str, size_t cantidad) { //Utiliza el algoritmo 'djb2'
-    unsigned long hash = 5381;
+size_t funcion_hash(const char *str, size_t cantidad) { //Utiliza el algoritmo 'djb2'
+    char* copia_clave = NULL;
+    copia_clave = strcpy(copia_clave,str);
+    
+    size_t hash = 5381;
     int c;
     
     while ((c = *str++))

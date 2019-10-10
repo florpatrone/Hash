@@ -271,7 +271,7 @@ void hash_destruir(hash_t *hash){
 
         while (!lista_esta_vacia(balde)){
             campo_t* campo = lista_borrar_primero(balde);
-            funcion_destruccion(campo->valor);
+            if (funcion_destruccion != NULL) funcion_destruccion(campo->valor);
             campo_destruir(campo);
         }
         lista_destruir(balde,NULL);

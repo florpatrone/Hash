@@ -1,13 +1,27 @@
 #define _POSIX_C_SOURCE 200809L 
 #include "hash.h"
 #include "lista.h"
+#include "lista.c"
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <math.h>
 #define BORRAR_NODO true
 
 #define FACTOR_CARGA 2
 #define CAPACIDAD_INICIAL 37
+
+/* Definiciones previas:
+    Baldes: lista enlazada que en sus nodos contiene como dato un puntero a otra lista enlazada.
+            Los baldes tendrán índices del 0 a m (siendo m el largo del hash).
+    
+    Listas: listas enlazadas apuntadas por el puntero del balde en un determinado índice.
+    Ej: balde en la posición 3 tiene un puntero que señala a una lista enlazada donde se encuentra, en cada nodo,
+        una clave para la cual la función de hashing devolvió un 3 y su respectivo valor.
+
+    Iterador_hash: itera la lista enlazada de baldes con punteros.
+    Iterador_lista: itera la lista enlazada que se encuentra dentro del balde elegido.
+*/
 
 /* Definición del struct campo */
 typedef struct campo {
@@ -20,7 +34,14 @@ struct hash {
     lista_t** baldes;
     size_t capacidad;
     size_t cantidad;
-    hash_destruir_dato_t funcion_destruccion;
+    void (*funcion_destruccion)(void*);
+};
+
+/* Definicion del struct iterador hash */
+struct hash_iter{
+    lista_t** lista;
+    void* anterior;
+    void* actual;
 };
 
 /***************************
@@ -60,39 +81,37 @@ size_t funcion_hash(const char *str, size_t cantidad) { //Utiliza el algoritmo '
     return hash%cantidad;
 }
 
-void *_hash_obtener(hash_t *hash, const char *clave, size_t indice_balde, bool borrar_nodo){
-    
-    if (hash->capacidad == indice_balde){ //si llega al final del hash
+void *_hash_obtener(hash_t* hash, const char *clave, size_t indice_balde, bool borrar_nodo){
+    if (hash->cantidad == indice_balde){         // Si ya recorrí toda la lista
         return NULL;
     }
     
-    lista_t *lista = hash->baldes[indice_balde]; // selecciona la lista enlazada en el balde actual
-    if (lista_esta_vacia(lista) || !lista){
+    lista_t* lista = hash->baldes[indice_balde];        // lista enlazada correspondiente a ese índice
+    if (!lista || lista_esta_vacia(lista)){
         return NULL;
     }
-    
-    lista_iter_t *iterador = lista_iter_crear(lista); // iterador para recorrer la lista enlazada
-    while (!lista_iter_al_final(iterador)){
-        campo_t *campo = lista_iter_ver_actual(iterador); // abre el dato del iterador, que es un campo
-        if (campo->clave != clave){                       // compara si campo->clave es lo buscado
-            lista_iter_avanzar(iterador);
+    lista_iter_t *iterador_lista = lista_iter_crear(lista);
+    void* valor;
+    while (!lista_iter_al_final(iterador_lista)){
+        campo_t* campo = lista_iter_ver_actual(iterador_lista);
+        if (campo->clave != clave){
+            lista_iter_avanzar(iterador_lista);
             continue;
         }
-        void *valor = campo->valor;             // si lo es, lo guarda, borra el nodo de la lista y devuelve el valor
+        valor = campo->valor;
         if (borrar_nodo){
-            lista_iter_borrar(iterador);
-            lista_iter_destruir(iterador);
+            lista_iter_borrar(iterador_lista);
         }
+        lista_iter_destruir(iterador_lista);
         return valor;
     }
-    lista_iter_destruir(iterador);
-    return _hash_obtener(hash,clave,++indice_balde,borrar_nodo);     // avanza un balde más abajo
+    lista_iter_destruir(iterador_lista);
+    return _hash_obtener(hash, clave, ++indice_balde, borrar_nodo);
 }
-
-bool hash_redimensionar_capacidad(hash_t *hash, size_t (*operacion) (hash_t*)){
-    size_t primos[] = {2, 3, 5, 7, 11 ,13, 17 ,19, 23, 29, 31, 37};
-    int n = 12;
-    size_t nueva_capacidad = (*operacion)(hash,primos, n);
+bool hash_redimensionar_capacidad(hash_t *hash, size_t (*operacion) (hash_t*, size_t*, size_t)){
+    size_t primos[] = {2, 3, 5, 7, 11 , 13, 17 ,19, 23, 29, 31, 37};
+    size_t n = 12;
+    size_t nueva_capacidad = (*operacion)(hash, primos, n);
 
     lista_t** lista_auxiliar = realloc(hash->baldes,nueva_capacidad * sizeof(lista_t*));
     if (!lista_auxiliar){
@@ -103,41 +122,40 @@ bool hash_redimensionar_capacidad(hash_t *hash, size_t (*operacion) (hash_t*)){
     return true;
 }
 size_t busqueda_binaria(size_t *arreglo, size_t inicio, size_t final, size_t buscado){
-    if (final >= inicio){
-        size_t medio = inicio + (final-inicio)/2;
-        
-        if (arreglo[medio] == buscado){
-            return medio;
-        }
-        if (arreglo[medio] > buscado){
-            return busqueda_binaria(arreglo, inicio, medio-1,buscado);
-        }
-        return busqueda_binaria(arreglo, medio+1, final, buscado);
+
+    size_t medio = inicio + (final-inicio)/2;
+    
+    if (arreglo[medio] == buscado){
+        return medio;
     }
-    return NULL;
+    if (arreglo[medio] > buscado){
+        return busqueda_binaria(arreglo, inicio, medio-1,buscado);
+    }
+    return busqueda_binaria(arreglo, medio+1, final, buscado);
 }
-size_t aumentar_capacidad(hash_t *hash, int *primos, int n){
+size_t aumentar_capacidad(hash_t *hash, size_t *primos, size_t n){
     if (hash->capacidad < primos[n-1]){                         // Si la capacidad es menor a 37
         n = busqueda_binaria(primos,0,n,hash->capacidad);
         n++;
         return primos[n];
     }
-    int m = 0;
+
+    size_t m = 0;
     size_t nueva_capacidad = m*m + m + 41;        // formula para conseguir primos desde el 41 hasta el 1601 (Wikipedia)
-    while (nueva_capacidad <= hash->capacidad){    /* chequear que se repite en reducir, función aparte?*/
+    while (nueva_capacidad <= hash->capacidad){
         m++;
         nueva_capacidad = m*m + m + 41;
     }
     return nueva_capacidad;
 }
 
-size_t reducir_capacidad(hash_t *hash, int *primos, int n){
+size_t reducir_capacidad(hash_t *hash, size_t *primos, size_t n){
     if (hash->capacidad > primos[n-1]){                         // Si la capacidad es menor a 37
         n = busqueda_binaria(primos,0,n,hash->capacidad);
         n--;
         return primos[n];
     }
-    int m = 0;
+    size_t m = 0;
     size_t nueva_capacidad = m*m + m + 41;        // formula para conseguir primos desde el 41 hasta el 1601 (Wikipedia)
     while (nueva_capacidad != hash->capacidad){
         m--;
@@ -146,13 +164,35 @@ size_t reducir_capacidad(hash_t *hash, int *primos, int n){
     return nueva_capacidad;
 }
 
+void pre_setear_lista(lista_t** lista){
+    for (size_t i = 0; i < CAPACIDAD_INICIAL; i++){
+        lista[i] = NULL;
+    }    
+}
+
+
 /***************************
 * Primitivas del Hash
 ****************************/
 
-/* hash_t *hash_crear(hash_destruir_dato_t destruir_dato){
+hash_t *hash_crear(void (*destruir_dato)(void*)){
+    hash_t* hash = malloc(sizeof(hash_t*));
+    if (!hash){
+        return NULL;
+    }
 
-} */
+    lista_t** baldes = malloc(CAPACIDAD_INICIAL * sizeof(lista_t*));
+    if (!baldes){
+        return NULL;
+    }
+    hash->baldes = baldes;
+    pre_setear_lista(hash->baldes);
+
+    hash->capacidad = CAPACIDAD_INICIAL;
+    hash->cantidad = 0;
+    hash->funcion_destruccion = destruir_dato;
+    return hash;
+}
 
 bool hash_guardar(hash_t *hash, const char *clave, void *dato){
     if ((hash->cantidad / hash->capacidad) >= FACTOR_CARGA){
@@ -190,7 +230,9 @@ void *hash_borrar(hash_t *hash, const char *clave){
     if (hash->cantidad == 0){
         return NULL;
     }
-    size_t indice_balde = funcion_hash(clave,cantidad);
+    size_t largo_hash = hash->capacidad;
+    size_t indice_balde = funcion_hash(clave, largo_hash);
+
     return _hash_obtener(hash, clave, indice_balde, BORRAR_NODO);
 }
 
@@ -230,4 +272,36 @@ void hash_destruir(hash_t *hash){
     }
     
     free(hash);
+}
+
+
+/***************************
+* Primitivas del Iterador
+****************************/
+
+hash_iter_t *hash_iter_crear(const hash_t *hash){
+    
+    lista_t** arreglo_hash = hash->baldes;
+    if (!arreglo_hash){
+        return NULL;
+    }
+    hash_iter_t *iterador_hash = malloc(sizeof(hash_iter_t));
+    if (!iterador_hash){
+        return NULL;
+    }
+    iterador_hash->lista = arreglo_hash;
+    iterador_hash->anterior = NULL;
+    iterador_hash->actual = arreglo_hash[0];
+
+    return iterador_hash;
+}
+
+/*bool hash_iter_avanzar(hash_iter_t *iter);*/
+
+/*const char *hash_iter_ver_actual(const hash_iter_t *iter);*/
+
+/*bool hash_iter_al_final(const hash_iter_t *iter);*/
+
+void hash_iter_destruir(hash_iter_t* iter){
+    free(iter);
 }

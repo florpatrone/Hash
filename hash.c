@@ -24,6 +24,26 @@ struct hash {
 };
 
 /***************************
+* Primitivas del Campo
+****************************/
+
+campo_t* campo_crear(char *clave, void *dato){
+    campo_t* campo = malloc(sizeof(campo_t));
+
+    if (campo == NULL) return NULL;
+    
+    campo->clave = clave;
+    campo->valor = dato;
+
+    return campo;
+}
+
+void campo_destruir(campo_t* campo){
+    free(campo->clave);
+    free(campo);
+}
+
+/***************************
 * Funciones auxiliares 
 ****************************/
 
@@ -157,7 +177,7 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato){
         hash->baldes[num_hash] = lista_crear();
     }
 
-    if ( (balde == NULL) || (!lista_insertar_ultimo(balde,campo)) ){ //si fallo la creacion de la lista o si fallo la insercion
+    if ( (balde == NULL) || (!lista_insertar_ultimo(balde,campo)) ){//si fallo la creacion de la lista o si fallo la insercion
         campo_destruir(campo);
         return false;
     }
@@ -210,22 +230,4 @@ void hash_destruir(hash_t *hash){
     }
     
     free(hash);
-}
-
-/* Primitivas del campo */
-
-campo_t* campo_crear(char *clave, void *dato){
-    campo_t* campo = malloc(sizeof(campo_t));
-
-    if (campo == NULL) return NULL;
-    
-    campo->clave = clave;
-    campo->valor = dato;
-
-    return campo;
-}
-
-void campo_destruir(campo_t* campo){
-    free(campo->clave);
-    free(campo);
 }

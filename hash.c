@@ -134,9 +134,37 @@ size_t reducir_capacidad(hash_t *hash, int *primos, int n){
 
 } */
 
-/* bool hash_guardar(hash_t *hash, const char *clave, void *dato){
+bool hash_guardar(hash_t *hash, const char *clave, void *dato){
+    if ((hash->cantidad / hash->capacidad) >= FACTOR_CARGA){
+        if (!hash_redimensionar_capacidad(hash,aumentar_capacidad)) return false;
+    } 
 
-} */
+    char* copia_clave = strdup(clave);
+
+    if (copia_clave == NULL) return false;
+
+    campo_t* campo = campo_crear(copia_clave,dato);
+
+    if (campo == NULL){
+       free(copia_clave);
+       return false;
+    }
+
+    size_t num_hash = funcion_hash(copia_clave,hash->capacidad);
+    lista_t* balde = hash->baldes[num_hash];
+
+    if (balde == NULL){
+        hash->baldes[num_hash] = lista_crear();
+    }
+
+    if ( (balde == NULL) || (!lista_insertar_ultimo(balde,campo)) ){ //si fallo la creacion de la lista o si fallo la insercion
+        campo_destruir(campo);
+        return false;
+    }
+
+    hash->cantidad++;
+    return true;
+}
 
 void *hash_borrar(hash_t *hash, const char *clave){
     if (hash->cantidad == 0){
@@ -154,14 +182,50 @@ void *hash_obtener(const hash_t *hash, const char *clave){
     return _hash_obtener(hash, clave,indice_balde, !BORRAR_NODO);
 }
 
-/* bool hash_pertenece(const hash_t *hash, const char *clave){
+bool hash_pertenece(const hash_t *hash, const char *clave){
+    size_t num_hash = funcion_hash(clave,hash->capacidad);
+    void* valor = _hash_obtener(hash, clave, num_hash, !borrar_nodo);
 
-} */
+    return (valor != NULL);
+}
 
-/* size_t hash_cantidad(const hash_t *hash){
+size_t hash_cantidad(const hash_t *hash){
+    return hash->cantidad;
+}
 
-} */
+void hash_destruir(hash_t *hash){
+    hash_destruir_dato_t funcion_destruccion = hash->funcion_destruccion;
 
-/* void hash_destruir(hash_t *hash){
+    for (int i = 0; i < hash->capacidad ; i++){
+        lista_t* balde = hash->baldes[i];
 
-} */
+        if (balde == NULL) continue;
+
+        while (!lista_esta_vacia(balde)){
+            campo_t* campo = lista_borrar_primero(balde);
+            funcion_destruccion(campo->valor);
+            campo_destruir(campo);
+        }
+        lista_destruir(balde,NULL);
+    }
+    
+    free(hash);
+}
+
+/* Primitivas del campo */
+
+campo_t* campo_crear(char *clave, void *dato){
+    campo_t* campo = malloc(sizeof(campo_t));
+
+    if (campo == NULL) return NULL;
+    
+    campo->clave = clave;
+    campo->valor = dato;
+
+    return campo;
+}
+
+void campo_destruir(campo_t* campo){
+    free(campo->clave);
+    free(campo);
+}

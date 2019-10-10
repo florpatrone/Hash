@@ -315,7 +315,9 @@ const char *hash_iter_ver_actual(const hash_iter_t *iter){
     return campo->clave;
 }
 
-/*bool hash_iter_al_final(const hash_iter_t *iter);*/
+bool hash_iter_al_final(const hash_iter_t *iter){
+    return iter->iterados == iter->hash->cantidad;
+}
 
 void hash_iter_destruir(hash_iter_t* iter){
     free(iter);

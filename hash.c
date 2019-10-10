@@ -106,6 +106,7 @@ void *_hash_obtener(const hash_t* hash, const char *clave, size_t indice_balde, 
         valor = campo->valor;
         if (borrar_nodo){
             lista_iter_borrar(iterador_lista);
+            hash->cantidad--;
         }
         lista_iter_destruir(iterador_lista);
         return valor;

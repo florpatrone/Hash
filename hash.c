@@ -40,6 +40,7 @@ struct hash {
 struct hash_iter{
     void* hash;
     size_t balde_actual;
+    lista_iter_t* balde_iter;
     size_t iterados;
 };
 
@@ -316,6 +317,8 @@ hash_iter_t *hash_iter_crear(const hash_t *hash){
     iterador_hash->hash = mem_hash;
     iterador_hash->balde_actual = 0;
     iterador_hash->iterados = 0;
+
+    iterador_hash->balde_iter = hash_iter_crear_balde_iter(iterador_hash->baldes);
 
     return iterador_hash;
 }

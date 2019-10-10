@@ -304,12 +304,11 @@ hash_iter_t *hash_iter_crear(const hash_t *hash){
 }
 
 bool hash_iter_avanzar(hash_iter_t *iter){
-    if hash_iter_al_final(iter) return false;
+    if (hash_iter_al_final(iter)) return false;
 
-    lista_iter_t* balde_iter = hash->balde_iter;
+    lista_iter_t* balde_iter = iter->balde_iter;
 
     lista_iter_avanzar(balde_iter);
-    
     iter->iterados ++;
     
     if (!lista_iter_al_final(balde_iter) || hash_iter_al_final(iter)) return true;
@@ -324,16 +323,16 @@ bool hash_iter_avanzar(hash_iter_t *iter){
 
     lista_iter_t* nuevo_balde_iter = lista_iter_crear(balde);
 
-    if (nuevo_lista_iter == NULL) return false; //falso negativo;
+    if (nuevo_balde_iter == NULL) return false; //falso negativo;
 
-    iter->iterador_lista = nuevo_balde_iter;
-    lista_iter_destruir(lista_iter);
+    iter->balde_iter = nuevo_balde_iter;
+    lista_iter_destruir(balde_iter);
 
     return true;
 }
 
 const char *hash_iter_ver_actual(const hash_iter_t *iter){
-    if hash_iter_al_final(iter) return NULL;
+    if (hash_iter_al_final(iter)) return NULL;
 
     campo_t* campo = lista_iter_ver_actual(iter->balde_iter);
     return campo->clave;

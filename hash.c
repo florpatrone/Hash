@@ -308,7 +308,12 @@ hash_iter_t *hash_iter_crear(const hash_t *hash){
 bool hash_iter_avanzar(hash_iter_t *iter){
 } */
 
-/*const char *hash_iter_ver_actual(const hash_iter_t *iter);*/
+const char *hash_iter_ver_actual(const hash_iter_t *iter){
+    if hash_iter_al_final(iter) return NULL;
+
+    campo_t* campo = lista_iter_ver_actual(iter->balde_iter);
+    return campo->clave;
+}
 
 /*bool hash_iter_al_final(const hash_iter_t *iter);*/
 

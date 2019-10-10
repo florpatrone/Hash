@@ -76,11 +76,11 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato){
 
     if (balde == NULL){
         hash->baldes[num_hash] = lista_crear();
+    }
 
-    if ( (balde == NULL) || (!lista_insertar_ultimo(balde,campo)) ){
-        campo_destruir(campo,hash->funcion_destruccion);
+    if ( (balde == NULL) || (!lista_insertar_ultimo(balde,campo)) ){ //si fallo la creacion de la lista o si fallo la insercion
+        campo_destruir(campo);
         return false;
-        }
     }
 
     hash->cantidad++;

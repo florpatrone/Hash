@@ -102,9 +102,9 @@ bool hash_pertenece(const hash_t *hash, const char *clave){
     return (valor != NULL);
 }
 
-/* size_t hash_cantidad(const hash_t *hash){
-
-} */
+size_t hash_cantidad(const hash_t *hash){
+    return hash->cantidad;
+}
 
 void hash_destruir(hash_t *hash){
     hash_destruir_dato_t funcion_destruccion = hash->funcion_destruccion;

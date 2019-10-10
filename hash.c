@@ -39,9 +39,9 @@ struct hash {
 
 /* Definicion del struct iterador hash */
 struct hash_iter{
-    lista_t** lista;
-    void* anterior;
-    void* actual;
+    void* hash;
+    size_t balde_actual;
+    size_t iterados;
 };
 
 /***************************
@@ -81,7 +81,12 @@ size_t funcion_hash(const char *str, size_t cantidad) { //Utiliza el algoritmo '
     return hash%cantidad;
 }
 
-void *_hash_obtener(hash_t* hash, const char *clave, size_t indice_balde, bool borrar_nodo){
+void *_hash_obtener(const hash_t* hash, const char *clave, size_t indice_balde, bool borrar_nodo){
+    
+    if (!clave){
+        return NULL;
+    }
+    
     if (hash->cantidad == indice_balde){         // Si ya recorrí toda la lista
         return NULL;
     }
@@ -227,9 +232,10 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato){
 }
 
 void *hash_borrar(hash_t *hash, const char *clave){
-    if (hash->cantidad == 0){
+    if (hash->cantidad == 0 || !clave){
         return NULL;
     }
+
     size_t largo_hash = hash->capacidad;
     size_t indice_balde = funcion_hash(clave, largo_hash);
 
@@ -237,9 +243,10 @@ void *hash_borrar(hash_t *hash, const char *clave){
 }
 
 void *hash_obtener(const hash_t *hash, const char *clave){
-    if (hash->cantidad == 0){
+    if (hash->cantidad == 0 || !clave){
         return NULL;
     }
+
     size_t indice_balde = funcion_hash(clave,hash->cantidad);
     return _hash_obtener(hash, clave,indice_balde, !BORRAR_NODO);
 }
@@ -289,14 +296,17 @@ hash_iter_t *hash_iter_crear(const hash_t *hash){
     if (!iterador_hash){
         return NULL;
     }
-    iterador_hash->lista = arreglo_hash;
-    iterador_hash->anterior = NULL;
-    iterador_hash->actual = arreglo_hash[0];
+    void* mem_hash = &hash;
+    iterador_hash->hash = mem_hash;
+    iterador_hash->balde_actual = 0;
+    iterador_hash->iterados = 0;
 
     return iterador_hash;
 }
 
-/*bool hash_iter_avanzar(hash_iter_t *iter);*/
+/*
+bool hash_iter_avanzar(hash_iter_t *iter){
+} */
 
 /*const char *hash_iter_ver_actual(const hash_iter_t *iter);*/
 

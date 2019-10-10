@@ -306,6 +306,7 @@ hash_iter_t *hash_iter_crear(const hash_t *hash){
 bool hash_iter_avanzar(hash_iter_t *iter){
     if (hash_iter_al_final(iter)) return false;
 
+    hash_t* hash = iter->hash;
     lista_iter_t* balde_iter = iter->balde_iter;
 
     lista_iter_avanzar(balde_iter);
@@ -315,7 +316,7 @@ bool hash_iter_avanzar(hash_iter_t *iter){
 
     iter->balde_actual++;
 
-    lista_t* balde = iter->hash->baldes[iter->balde_actual];
+    lista_t* balde = hash->baldes[iter->balde_actual];
 
     while (balde == NULL){
         iter->balde_actual++;
@@ -339,7 +340,8 @@ const char *hash_iter_ver_actual(const hash_iter_t *iter){
 }
 
 bool hash_iter_al_final(const hash_iter_t *iter){
-    return iter->iterados == iter->hash->cantidad;
+    hash_t* hash = iter->hash;
+    return iter->iterados == hash->cantidad;
 }
 
 void hash_iter_destruir(hash_iter_t* iter){

@@ -174,6 +174,17 @@ void pre_setear_lista(lista_t** lista){
     }    
 }
 
+lista_iter_t* hash_iter_crear_balde_iter(hash_iter_t* iter){
+    lista_t* balde = hash->baldes[iter->balde_actual]
+
+    while (balde == NULL){
+        iter->balde_actual++;
+    }
+
+    lista_iter_t* balde_iter = lista_iter_crear(balde);
+
+    return balde_iter;
+}
 
 /***************************
 * Primitivas del Hash
@@ -316,13 +327,7 @@ bool hash_iter_avanzar(hash_iter_t *iter){
 
     iter->balde_actual++;
 
-    lista_t* balde = hash->baldes[iter->balde_actual];
-
-    while (balde == NULL){
-        iter->balde_actual++;
-    }
-
-    lista_iter_t* nuevo_balde_iter = lista_iter_crear(balde);
+    lista_iter_t* nuevo_balde_iter = hash_iter_crear_balde_iter(iter);
 
     if (nuevo_balde_iter == NULL) return false; //falso negativo;
 

@@ -1,7 +1,6 @@
 #define _POSIX_C_SOURCE 200809L 
 #include "hash.h"
 #include "lista.h"
-#include "lista.c"
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
@@ -9,7 +8,7 @@
 #define BORRAR_NODO true
 
 #define FACTOR_CARGA 2
-#define CAPACIDAD_INICIAL 37
+#define CAPACIDAD_INICIAL 17
 
 /* Definiciones previas:
     Baldes: lista enlazada que en sus nodos contiene como dato un puntero a otra lista enlazada.

@@ -194,7 +194,7 @@ void pre_setear_lista(lista_t** lista){
 }
 
 lista_iter_t* hash_iter_crear_balde_iter(hash_iter_t* iter){
-    lista_t* balde = hash->baldes[iter->balde_actual]
+    lista_t* balde = iter->hash->baldes[iter->balde_actual]
 
     while (balde == NULL){
         iter->balde_actual++;

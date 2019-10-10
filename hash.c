@@ -40,6 +40,7 @@ struct hash {
 struct hash_iter{
     void* hash;
     size_t balde_actual;
+    lista_iter_t* balde_iter;
     size_t iterados;
 };
 
@@ -105,6 +106,7 @@ void *_hash_obtener(const hash_t* hash, const char *clave, size_t indice_balde, 
         valor = campo->valor;
         if (borrar_nodo){
             lista_iter_borrar(iterador_lista);
+            hash->cantidad--;
         }
         lista_iter_destruir(iterador_lista);
         return valor;
@@ -112,18 +114,35 @@ void *_hash_obtener(const hash_t* hash, const char *clave, size_t indice_balde, 
     lista_iter_destruir(iterador_lista);
     return _hash_obtener(hash, clave, ++indice_balde, borrar_nodo);
 }
+
+hash_t* transferir_datos(hash_t hash, size_t nueva_capacidad){
+    hash_t* nuevo_hash = hash_crear(hash->destruir_dato);
+    nuevo_hash->capacidad = nueva_capacidad;
+
+    for (size_t i = 0; i < hash->capacidad; i++){
+        lista_t* lista_hash_orig = hash->baldes[i];
+        if (lista_hash_orig == NULL){
+            continue;
+        }
+        lista_iter_t * iterador_lista = lista_iter_crear(lista_hash_orig);
+        while (!lista_iter_al_final(iterador_lista)){
+            campo_t* campo = lista_iter_ver_actual(iterador_lista);                
+            hash_guardar(nuevo_hash, campo->clave, campo->valor);
+            lista_iter_borrar(iterador_lista);
+        }
+        lista_iter_destruir(iterador_lista);
+    }
+    hash_destruir(hash);
+    return nuevo_hash;
+}
+
 bool hash_redimensionar_capacidad(hash_t *hash, size_t (*operacion) (hash_t*, size_t*, size_t)){
     size_t primos[] = {2, 3, 5, 7, 11 , 13, 17 ,19, 23, 29, 31, 37};
     size_t n = 12;
     size_t nueva_capacidad = (*operacion)(hash, primos, n);
 
-    lista_t** lista_auxiliar = realloc(hash->baldes,nueva_capacidad * sizeof(lista_t*));
-    if (!lista_auxiliar){
-        return false;
-    }
-    hash->baldes = lista_auxiliar;
-    hash->capacidad = nueva_capacidad;
-    return true;
+    hash_t* hash = transferir_datos(hash, nueva_capacidad);
+    return (hash != NULL) ? true : false;
 }
 size_t busqueda_binaria(size_t *arreglo, size_t inicio, size_t final, size_t buscado){
 
@@ -310,6 +329,8 @@ hash_iter_t *hash_iter_crear(const hash_t *hash){
     iterador_hash->hash = mem_hash;
     iterador_hash->balde_actual = 0;
     iterador_hash->iterados = 0;
+
+    iterador_hash->balde_iter = hash_iter_crear_balde_iter(iterador_hash->baldes);
 
     return iterador_hash;
 }

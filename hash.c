@@ -193,8 +193,9 @@ void pre_setear_lista(lista_t** lista){
     }    
 }
 
-lista_iter_t* hash_iter_crear_balde_iter(hash_iter_t* iter){
-    lista_t* balde = iter->hash->baldes[iter->balde_actual]
+lista_iter_t* hashiter_crear_balde_iter_iter_crear_balde_iter(hash_iter_t* iter){
+    hash_t* hash = iter->hash;
+    lista_t* balde = hash->baldes[iter->balde_actual];
 
     while (balde == NULL){
         iter->balde_actual++;
@@ -338,11 +339,10 @@ hash_iter_t *hash_iter_crear(const hash_t *hash){
 bool hash_iter_avanzar(hash_iter_t *iter){
     if (hash_iter_al_final(iter)) return false;
 
-    hash_t* hash = iter->hash;
     lista_iter_t* balde_iter = iter->balde_iter;
 
     lista_iter_avanzar(balde_iter);
-    iter->iterados ++;
+    iter->iterados++;
     
     if (!lista_iter_al_final(balde_iter) || hash_iter_al_final(iter)) return true;
 

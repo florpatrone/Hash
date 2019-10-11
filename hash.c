@@ -33,7 +33,7 @@ struct hash {
     lista_t** baldes;
     size_t capacidad;
     size_t cantidad;
-    void (*funcion_destruccion)(void*);
+    void (*destruir_dato)(void*);
 };
 
 /* Definicion del struct iterador hash */
@@ -106,7 +106,6 @@ void *_hash_obtener(const hash_t* hash, const char *clave, size_t indice_balde, 
         valor = campo->valor;
         if (borrar_nodo){
             lista_iter_borrar(iterador_lista);
-            hash->cantidad--;
         }
         lista_iter_destruir(iterador_lista);
         return valor;
@@ -115,7 +114,7 @@ void *_hash_obtener(const hash_t* hash, const char *clave, size_t indice_balde, 
     return _hash_obtener(hash, clave, ++indice_balde, borrar_nodo);
 }
 
-hash_t* transferir_datos(hash_t hash, size_t nueva_capacidad){
+hash_t* transferir_datos(hash_t* hash, size_t nueva_capacidad){
     hash_t* nuevo_hash = hash_crear(hash->destruir_dato);
     nuevo_hash->capacidad = nueva_capacidad;
 
@@ -141,7 +140,7 @@ bool hash_redimensionar_capacidad(hash_t *hash, size_t (*operacion) (hash_t*, si
     size_t n = 12;
     size_t nueva_capacidad = (*operacion)(hash, primos, n);
 
-    hash_t* hash = transferir_datos(hash, nueva_capacidad);
+    hash = transferir_datos(hash, nueva_capacidad);
     return (hash != NULL) ? true : false;
 }
 size_t busqueda_binaria(size_t *arreglo, size_t inicio, size_t final, size_t buscado){
@@ -225,7 +224,7 @@ hash_t *hash_crear(void (*destruir_dato)(void*)){
 
     hash->capacidad = CAPACIDAD_INICIAL;
     hash->cantidad = 0;
-    hash->funcion_destruccion = destruir_dato;
+    hash->destruir_dato = destruir_dato;
     return hash;
 }
 
@@ -269,7 +268,9 @@ void *hash_borrar(hash_t *hash, const char *clave){
     size_t largo_hash = hash->capacidad;
     size_t indice_balde = funcion_hash(clave, largo_hash);
 
-    return _hash_obtener(hash, clave, indice_balde, BORRAR_NODO);
+    void* valor = _hash_obtener(hash, clave, indice_balde, BORRAR_NODO);
+    hash->cantidad--;
+    return valor;
 }
 
 void *hash_obtener(const hash_t *hash, const char *clave){
@@ -293,7 +294,7 @@ size_t hash_cantidad(const hash_t *hash){
 }
 
 void hash_destruir(hash_t *hash){
-    hash_destruir_dato_t funcion_destruccion = hash->funcion_destruccion;
+    hash_destruir_dato_t destruir_dato = hash->destruir_dato;
 
     for (int i = 0; i < hash->capacidad ; i++){
         lista_t* balde = hash->baldes[i];
@@ -302,7 +303,7 @@ void hash_destruir(hash_t *hash){
 
         while (!lista_esta_vacia(balde)){
             campo_t* campo = lista_borrar_primero(balde);
-            if (funcion_destruccion != NULL) funcion_destruccion(campo->valor);
+            if (destruir_dato != NULL) destruir_dato(campo->valor);
             campo_destruir(campo);
         }
         lista_destruir(balde,NULL);
@@ -331,7 +332,7 @@ hash_iter_t *hash_iter_crear(const hash_t *hash){
     iterador_hash->balde_actual = 0;
     iterador_hash->iterados = 0;
 
-    iterador_hash->balde_iter = hash_iter_crear_balde_iter(iterador_hash->baldes);
+    iterador_hash->balde_iter = hash_iter_crear_balde_iter(iterador_hash);
 
     return iterador_hash;
 }

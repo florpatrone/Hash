@@ -283,10 +283,12 @@ void *hash_obtener(const hash_t *hash, const char *clave){
 }
 
 bool hash_pertenece(const hash_t *hash, const char *clave){
+    if (hash->cantidad == 0 || !clave) return NULL;
+    
     size_t num_hash = funcion_hash(clave,hash->capacidad);
     void* valor = _hash_obtener(hash, clave, num_hash, !BORRAR_NODO);
 
-    return (valor != NULL);
+    return valor != NULL;
 }
 
 size_t hash_cantidad(const hash_t *hash){

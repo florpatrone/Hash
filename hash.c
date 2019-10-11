@@ -193,7 +193,7 @@ void pre_setear_lista(lista_t** lista){
     }    
 }
 
-lista_iter_t* hashiter_crear_balde_iter_iter_crear_balde_iter(hash_iter_t* iter){
+lista_iter_t* hash_iter_crear_balde_iter(hash_iter_t* iter){
     hash_t* hash = iter->hash;
     lista_t* balde = hash->baldes[iter->balde_actual];
 

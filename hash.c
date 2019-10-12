@@ -291,7 +291,7 @@ void *hash_obtener(const hash_t *hash, const char *clave){
 
     size_t indice_balde = funcion_hash(clave,hash->capacidad);
     campo_t* campo = _hash_obtener(hash, clave,indice_balde, !BORRAR_NODO);
-    return campo->valor;
+    return campo ? campo->valor : NULL;
 }
 
 bool hash_pertenece(const hash_t *hash, const char *clave){
@@ -301,7 +301,7 @@ bool hash_pertenece(const hash_t *hash, const char *clave){
     campo_t* campo = _hash_obtener(hash, clave, num_hash, !BORRAR_NODO);
 
 
-    return campo->valor != NULL;
+    return campo != NULL;
 }
 
 size_t hash_cantidad(const hash_t *hash){

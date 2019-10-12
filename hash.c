@@ -195,17 +195,16 @@ void pre_setear_lista(lista_t** lista){
 }
 
 lista_iter_t* hash_iter_crear_balde_iter(hash_iter_t* iter){
-    const hash_t* hash = iter->hash;
+    lista_t** baldes = iter->hash->baldes;
+    size_t* actual = &(iter->balde_actual);
 
-    if (hash_cantidad(hash) == 0) return NULL;
+    if (hash_cantidad(iter->hash) == 0) return NULL;
 
-    lista_t* balde = hash->baldes[iter->balde_actual];
-
-    while (balde == NULL){
-        iter->balde_actual++;
+    while (baldes[*actual] == NULL){
+        (*actual)++;
     }
 
-    lista_iter_t* balde_iter = lista_iter_crear(balde);
+    lista_iter_t* balde_iter = lista_iter_crear(baldes[*actual]);
 
     return balde_iter;
 }

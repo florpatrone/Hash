@@ -280,7 +280,7 @@ void *hash_borrar(hash_t *hash, const char *clave){
     size_t indice_balde = funcion_hash(clave, largo_hash);
 
     void* valor = _hash_obtener(hash, clave, indice_balde, BORRAR_NODO);
-    hash->cantidad--;
+    if (valor != NULL) hash->cantidad--;
     return valor;
 }
 

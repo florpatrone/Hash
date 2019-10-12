@@ -78,7 +78,7 @@ size_t funcion_hash(const char *str, size_t cantidad) { //Utiliza el algoritmo '
     return hash%cantidad;
 }
 
-void *_hash_obtener(const hash_t* hash, const char *clave, size_t indice_balde, bool borrar_nodo){
+campo_t *_hash_obtener(const hash_t* hash, const char *clave, size_t indice_balde, bool borrar_nodo){
     
     if (!clave){
         return NULL;
@@ -94,7 +94,6 @@ void *_hash_obtener(const hash_t* hash, const char *clave, size_t indice_balde, 
     }
     lista_iter_t *iterador_lista = lista_iter_crear(lista);
     
-    void* valor;
     campo_t* campo;
     
     while (!lista_iter_al_final(iterador_lista)){
@@ -104,12 +103,14 @@ void *_hash_obtener(const hash_t* hash, const char *clave, size_t indice_balde, 
             continue;
         }
         if (borrar_nodo){
-            valor = campo->valor;
+            campo_t* campo_borrar = campo;
+            campo = campo_crear(strdup(campo->clave),campo->valor);
+        
             lista_iter_borrar(iterador_lista);
-            campo_destruir(campo);
-        }
+            campo_destruir(campo_borrar);
+            }
         lista_iter_destruir(iterador_lista);
-        return borrar_nodo ? valor:campo;
+        return campo;
     }
     lista_iter_destruir(iterador_lista);
     return _hash_obtener(hash, clave, ++indice_balde, borrar_nodo);
@@ -279,8 +280,13 @@ void *hash_borrar(hash_t *hash, const char *clave){
     size_t largo_hash = hash->capacidad;
     size_t indice_balde = funcion_hash(clave, largo_hash);
 
-    void* valor = _hash_obtener(hash, clave, indice_balde, BORRAR_NODO);
-    if (valor != NULL) hash->cantidad--;
+    campo_t* campo = _hash_obtener(hash, clave, indice_balde, BORRAR_NODO);
+    
+    if (campo == NULL) return NULL;
+
+    hash->cantidad--;
+    void* valor = campo->valor;
+    campo_destruir(campo);
     return valor;
 }
 

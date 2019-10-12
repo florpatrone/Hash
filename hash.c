@@ -38,7 +38,7 @@ struct hash {
 
 /* Definicion del struct iterador hash */
 struct hash_iter{
-    void* hash;
+    const hash_t* hash;
     size_t balde_actual;
     lista_iter_t* balde_iter;
     size_t iterados;
@@ -193,7 +193,10 @@ void pre_setear_lista(lista_t** lista){
 }
 
 lista_iter_t* hash_iter_crear_balde_iter(hash_iter_t* iter){
-    hash_t* hash = iter->hash;
+    const hash_t* hash = iter->hash;
+
+    if (hash_cantidad(hash) == 0) return NULL;
+
     lista_t* balde = hash->baldes[iter->balde_actual];
 
     while (balde == NULL){
@@ -284,7 +287,7 @@ void *hash_obtener(const hash_t *hash, const char *clave){
 
 bool hash_pertenece(const hash_t *hash, const char *clave){
     if (hash->cantidad == 0 || !clave) return NULL;
-    
+
     size_t num_hash = funcion_hash(clave,hash->capacidad);
     void* valor = _hash_obtener(hash, clave, num_hash, !BORRAR_NODO);
 
@@ -329,11 +332,9 @@ hash_iter_t *hash_iter_crear(const hash_t *hash){
     if (!iterador_hash){
         return NULL;
     }
-    void* mem_hash = &hash;
-    iterador_hash->hash = mem_hash;
+    iterador_hash->hash = hash;
     iterador_hash->balde_actual = 0;
     iterador_hash->iterados = 0;
-
     iterador_hash->balde_iter = hash_iter_crear_balde_iter(iterador_hash);
 
     return iterador_hash;
@@ -369,8 +370,7 @@ const char *hash_iter_ver_actual(const hash_iter_t *iter){
 }
 
 bool hash_iter_al_final(const hash_iter_t *iter){
-    hash_t* hash = iter->hash;
-    return iter->iterados == hash->cantidad;
+    return iter->iterados == hash_cantidad(iter->hash);
 }
 
 void hash_iter_destruir(hash_iter_t* iter){

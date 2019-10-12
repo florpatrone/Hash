@@ -210,7 +210,7 @@ lista_iter_t* hash_iter_crear_balde_iter(hash_iter_t* iter){
 ****************************/
 
 hash_t *hash_crear(void (*destruir_dato)(void*)){
-    hash_t* hash = malloc(sizeof(hash_t*));
+    hash_t* hash = malloc(sizeof(hash_t));
     if (!hash){
         return NULL;
     }
@@ -312,6 +312,7 @@ void hash_destruir(hash_t *hash){
         lista_destruir(balde,NULL);
     }
     
+    free(hash->baldes);
     free(hash);
 }
 

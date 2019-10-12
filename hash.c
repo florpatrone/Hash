@@ -281,7 +281,7 @@ void *hash_obtener(const hash_t *hash, const char *clave){
         return NULL;
     }
 
-    size_t indice_balde = funcion_hash(clave,hash->cantidad);
+    size_t indice_balde = funcion_hash(clave,hash->capacidad);
     return _hash_obtener(hash, clave,indice_balde, !BORRAR_NODO);
 }
 

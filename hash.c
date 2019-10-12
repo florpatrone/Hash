@@ -84,7 +84,7 @@ void *_hash_obtener(const hash_t* hash, const char *clave, size_t indice_balde, 
         return NULL;
     }
     
-    if (hash->cantidad == indice_balde){         // Si ya recorrí toda la lista
+    if (hash->capacidad == indice_balde){         // Si ya recorrí toda la lista
         return NULL;
     }
     

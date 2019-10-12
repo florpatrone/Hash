@@ -242,6 +242,7 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato){
     campo_t* campo = _hash_obtener(hash,clave,num_hash,!BORRAR_NODO);
 
     if (campo != NULL){
+        if (hash->destruir_dato) hash->destruir_dato(campo->valor);
         campo->valor = dato;
         return true;
     }

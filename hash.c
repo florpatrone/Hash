@@ -69,9 +69,6 @@ void campo_destruir(campo_t* campo){
 ****************************/
 
 size_t funcion_hash(const char *str, size_t cantidad) { //Utiliza el algoritmo 'djb2'
-    char* copia_clave = NULL;
-    copia_clave = strcpy(copia_clave,str);
-    
     size_t hash = 5381;
     int c;
     

@@ -99,7 +99,7 @@ void *_hash_obtener(const hash_t* hash, const char *clave, size_t indice_balde, 
     void* valor;
     while (!lista_iter_al_final(iterador_lista)){
         campo_t* campo = lista_iter_ver_actual(iterador_lista);
-        if (campo->clave != clave){
+        if (strcmp(campo->clave,clave) != 0){
             lista_iter_avanzar(iterador_lista);
             continue;
         }

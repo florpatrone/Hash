@@ -391,5 +391,6 @@ bool hash_iter_al_final(const hash_iter_t *iter){
 }
 
 void hash_iter_destruir(hash_iter_t* iter){
+    if (iter->balde_iter) lista_iter_destruir(iter->balde_iter);
     free(iter);
 }

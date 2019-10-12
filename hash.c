@@ -5,8 +5,8 @@
 #include <stdbool.h>
 #include <string.h>
 #include <math.h>
-#define BORRAR_NODO true
 
+#define BORRAR_NODO true
 #define FACTOR_CARGA 2
 #define CAPACIDAD_INICIAL 17
 
@@ -93,19 +93,23 @@ void *_hash_obtener(const hash_t* hash, const char *clave, size_t indice_balde, 
         return NULL;
     }
     lista_iter_t *iterador_lista = lista_iter_crear(lista);
+    
     void* valor;
+    campo_t* campo;
+    
     while (!lista_iter_al_final(iterador_lista)){
-        campo_t* campo = lista_iter_ver_actual(iterador_lista);
+        campo = lista_iter_ver_actual(iterador_lista);
         if (strcmp(campo->clave,clave) != 0){
             lista_iter_avanzar(iterador_lista);
             continue;
         }
-        valor = campo->valor;
         if (borrar_nodo){
+            valor = campo->valor;
             lista_iter_borrar(iterador_lista);
+            campo_destruir(campo);
         }
         lista_iter_destruir(iterador_lista);
-        return valor;
+        return borrar_nodo ? valor:campo;
     }
     lista_iter_destruir(iterador_lista);
     return _hash_obtener(hash, clave, ++indice_balde, borrar_nodo);
@@ -233,18 +237,25 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato){
         if (!hash_redimensionar_capacidad(hash,aumentar_capacidad)) return false;
     } 
 
+    size_t num_hash = funcion_hash(clave,hash->capacidad);
+
+    campo_t* campo = _hash_obtener(hash,clave,num_hash,!BORRAR_NODO);
+
+    if (campo != NULL){
+        campo->valor = dato;
+        return true;
+    }
+
     char* copia_clave = strdup(clave);
 
     if (copia_clave == NULL) return false;
 
-    campo_t* campo = campo_crear(copia_clave,dato);
+    campo = campo_crear(copia_clave,dato);
 
     if (campo == NULL){
        free(copia_clave);
        return false;
     }
-
-    size_t num_hash = funcion_hash(copia_clave,hash->capacidad);
 
     lista_t** baldes = hash->baldes;
 
@@ -256,7 +267,6 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato){
         campo_destruir(campo);
         return false;
     }
-
     hash->cantidad++;
     return true;
 }
@@ -280,16 +290,18 @@ void *hash_obtener(const hash_t *hash, const char *clave){
     }
 
     size_t indice_balde = funcion_hash(clave,hash->capacidad);
-    return _hash_obtener(hash, clave,indice_balde, !BORRAR_NODO);
+    campo_t* campo = _hash_obtener(hash, clave,indice_balde, !BORRAR_NODO);
+    return campo->valor;
 }
 
 bool hash_pertenece(const hash_t *hash, const char *clave){
     if (hash->cantidad == 0 || !clave) return NULL;
 
     size_t num_hash = funcion_hash(clave,hash->capacidad);
-    void* valor = _hash_obtener(hash, clave, num_hash, !BORRAR_NODO);
+    campo_t* campo = _hash_obtener(hash, clave, num_hash, !BORRAR_NODO);
 
-    return valor != NULL;
+
+    return campo->valor != NULL;
 }
 
 size_t hash_cantidad(const hash_t *hash){

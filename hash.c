@@ -245,13 +245,14 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato){
     }
 
     size_t num_hash = funcion_hash(copia_clave,hash->capacidad);
-    lista_t* balde = hash->baldes[num_hash];
 
-    if (balde == NULL){
-        hash->baldes[num_hash] = lista_crear();
+    lista_t** baldes = hash->baldes;
+
+    if (baldes[num_hash] == NULL){
+        baldes[num_hash] = lista_crear();
     }
 
-    if ( (balde == NULL) || (!lista_insertar_ultimo(balde,campo)) ){//si fallo la creacion de la lista o si fallo la insercion
+    if ((baldes[num_hash] == NULL) || (!lista_insertar_ultimo(baldes[num_hash],campo)) ){//si fallo la creacion de la lista o si fallo la insercion
         campo_destruir(campo);
         return false;
     }

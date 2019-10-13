@@ -161,43 +161,49 @@ bool hash_redimensionar_capacidad(hash_t *hash, size_t (*operacion) (hash_t*, si
 
     return transferir_datos(hash, nueva_capacidad);
 }
-size_t busqueda_binaria(size_t *arreglo, size_t inicio, size_t final, size_t buscado){
 
-    size_t medio = inicio + (final-inicio)/2;
-    
-    if (arreglo[medio] == buscado){
-        return medio;
+size_t busqueda_mayores(size_t buscado,size_t inicio,size_t fin,size_t elemento){
+    size_t m = inicio + ((fin-inicio)/2);
+    size_t c = (m*m) + m + 41;
+
+    if (inicio >= fin){
+        return elemento;
     }
-    if (arreglo[medio] > buscado){
-        return busqueda_binaria(arreglo, inicio, medio-1,buscado);
+
+    if (c < buscado){
+        return busqueda_mayores(m+1,fin,buscado,elemento);
     }
-    return busqueda_binaria(arreglo, medio+1, final, buscado);
+
+    return busqueda_mayores(inicio,m,buscado,c);
 }
+
+size_t busqueda_menores(size_t buscado, size_t* arreglo, size_t inicio, size_t fin){
+    size_t medio = inicio + ( (fin-inicio)/2);
+    size_t elemento = arreglo[medio];
+
+    if (elemento == buscado){
+        return elemento;
+    }
+
+    if (elemento < buscado){
+        return busqueda_menores(buscado,arreglo,medio+1,fin);
+    }
+
+    if (arreglo[medio-1] < buscado){
+        return elemento;
+    }
+
+    return busqueda_menores(buscado,arreglo,inicio,medio);  
+}
+
 size_t aumentar_capacidad(hash_t *hash, size_t *primos, size_t n){
     size_t capacidad = hash->capacidad*2;
 
-    size_t m = 0;
-    size_t nueva_capacidad = m*m + m + 41;        // formula para conseguir primos desde el 41 hasta el 1601 (Wikipedia)
-    while (nueva_capacidad < capacidad){
-        m++;
-        nueva_capacidad = m*m + m + 41;
+    if (capacidad <= primos[n-1]){
+        return busqueda_menores(capacidad,primos,0,n);
     }
-    return nueva_capacidad;
-}
 
-size_t reducir_capacidad(hash_t *hash, size_t *primos, size_t n){
-    if (hash->capacidad > primos[n-1]){                         // Si la capacidad es menor a 37
-        n = busqueda_binaria(primos,0,n,hash->capacidad);
-        n--;
-        return primos[n];
-    }
-    size_t m = 0;
-    size_t nueva_capacidad = m*m + m + 41;        // formula para conseguir primos desde el 41 hasta el 1601 (Wikipedia)
-    while (nueva_capacidad != hash->capacidad){
-        m--;
-        nueva_capacidad = m*m + m + 41;
-    }
-    return nueva_capacidad;
+    return busqueda_mayores(capacidad,0,40,capacidad);
 }
 
 lista_iter_t* hash_iter_crear_balde_iter(hash_iter_t* iter){

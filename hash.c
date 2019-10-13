@@ -116,25 +116,43 @@ campo_t *_hash_obtener(const hash_t* hash, const char *clave, size_t indice_bald
     return _hash_obtener(hash, clave, ++indice_balde, borrar_nodo);
 }
 
-hash_t* transferir_datos(hash_t* hash, size_t nueva_capacidad){
-    hash_t* nuevo_hash = hash_crear(hash->destruir_dato);
-    nuevo_hash->capacidad = nueva_capacidad;
+void pre_setear_lista(lista_t** lista, size_t n){
+    for (size_t i = 0; i < n; i++){
+        lista[i] = NULL;
+    }    
+}
 
+bool transferir_datos(hash_t* hash, size_t nueva_capacidad){
+    lista_t** baldes = malloc(sizeof(lista_t*)*nueva_capacidad);
+    pre_setear_lista(baldes,nueva_capacidad);
+    
     for (size_t i = 0; i < hash->capacidad; i++){
         lista_t* lista_hash_orig = hash->baldes[i];
+
         if (lista_hash_orig == NULL){
             continue;
         }
         lista_iter_t * iterador_lista = lista_iter_crear(lista_hash_orig);
+        
         while (!lista_iter_al_final(iterador_lista)){
             campo_t* campo = lista_iter_ver_actual(iterador_lista);                
-            hash_guardar(nuevo_hash, campo->clave, campo->valor);
+            size_t num_hash = funcion_hash(campo->clave,nueva_capacidad);
+
+            if (baldes[num_hash] == NULL){
+                baldes[num_hash] = lista_crear();
+            }
+
+            lista_insertar_ultimo(baldes[num_hash],campo);
             lista_iter_borrar(iterador_lista);
         }
         lista_iter_destruir(iterador_lista);
+        lista_destruir(lista_hash_orig,NULL);
     }
-    hash_destruir(hash);
-    return nuevo_hash;
+    
+    free(hash->baldes);
+    hash->baldes = baldes;
+
+    return true;
 }
 
 bool hash_redimensionar_capacidad(hash_t *hash, size_t (*operacion) (hash_t*, size_t*, size_t)){
@@ -142,8 +160,7 @@ bool hash_redimensionar_capacidad(hash_t *hash, size_t (*operacion) (hash_t*, si
     size_t n = 12;
     size_t nueva_capacidad = (*operacion)(hash, primos, n);
 
-    hash = transferir_datos(hash, nueva_capacidad);
-    return (hash != NULL) ? true : false;
+    return transferir_datos(hash, nueva_capacidad);
 }
 size_t busqueda_binaria(size_t *arreglo, size_t inicio, size_t final, size_t buscado){
 
@@ -188,12 +205,6 @@ size_t reducir_capacidad(hash_t *hash, size_t *primos, size_t n){
     return nueva_capacidad;
 }
 
-void pre_setear_lista(lista_t** lista){
-    for (size_t i = 0; i < CAPACIDAD_INICIAL; i++){
-        lista[i] = NULL;
-    }    
-}
-
 lista_iter_t* hash_iter_crear_balde_iter(hash_iter_t* iter){
     lista_t** baldes = iter->hash->baldes;
     size_t* actual = &(iter->balde_actual);
@@ -224,7 +235,7 @@ hash_t *hash_crear(void (*destruir_dato)(void*)){
         return NULL;
     }
     hash->baldes = baldes;
-    pre_setear_lista(hash->baldes);
+    pre_setear_lista(hash->baldes,CAPACIDAD_INICIAL);
 
     hash->capacidad = CAPACIDAD_INICIAL;
     hash->cantidad = 0;

@@ -159,7 +159,11 @@ bool hash_redimensionar_capacidad(hash_t *hash, size_t (*operacion) (hash_t*, si
     size_t n = 12;
     size_t nueva_capacidad = (*operacion)(hash, primos, n);
 
-    return transferir_datos(hash, nueva_capacidad);
+    if (transferir_datos(hash, nueva_capacidad)){
+        hash->capacidad = nueva_capacidad;
+        return true;
+    }
+    return false;
 }
 
 size_t busqueda_mayores(size_t buscado,size_t inicio,size_t fin,size_t elemento){

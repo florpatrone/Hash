@@ -4,11 +4,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include <math.h>
 
 #define BORRAR_NODO true
 #define FACTOR_CARGA 2
-#define CAPACIDAD_INICIAL 17
+#define CAPACIDAD_INICIAL 19
 
 /* Definiciones previas:
     Baldes: lista enlazada que en sus nodos contiene como dato un puntero a otra lista enlazada.
@@ -175,15 +174,11 @@ size_t busqueda_binaria(size_t *arreglo, size_t inicio, size_t final, size_t bus
     return busqueda_binaria(arreglo, medio+1, final, buscado);
 }
 size_t aumentar_capacidad(hash_t *hash, size_t *primos, size_t n){
-    if (hash->capacidad < primos[n-1]){                         // Si la capacidad es menor a 37
-        n = busqueda_binaria(primos,0,n,hash->capacidad);
-        n++;
-        return primos[n];
-    }
+    size_t capacidad = hash->capacidad*2;
 
     size_t m = 0;
     size_t nueva_capacidad = m*m + m + 41;        // formula para conseguir primos desde el 41 hasta el 1601 (Wikipedia)
-    while (nueva_capacidad <= hash->capacidad){
+    while (nueva_capacidad < capacidad){
         m++;
         nueva_capacidad = m*m + m + 41;
     }

@@ -6,6 +6,7 @@
 #include <string.h>
 
 #define BORRAR_NODO true
+#define AUMENTAR true
 #define FACTOR_CARGA 2
 #define CAPACIDAD_INICIAL 19
 
@@ -181,30 +182,34 @@ size_t busqueda_mayores(size_t buscado,size_t inicio,size_t fin,size_t elemento)
     return busqueda_mayores(inicio,m,buscado,c);
 }
 
-size_t busqueda_menores(size_t buscado, size_t* arreglo, size_t inicio, size_t fin){
+size_t busqueda_menores(size_t buscado, size_t* arreglo, size_t inicio, size_t fin, bool condicion){
     size_t medio = inicio + ( (fin-inicio)/2);
     size_t elemento = arreglo[medio];
 
-    if (elemento == buscado){
-        return elemento;
-    }
-
     if (elemento < buscado){
-        return busqueda_menores(buscado,arreglo,medio+1,fin);
+        return busqueda_menores(buscado,arreglo,medio+1,fin,condicion);
     }
-
     if (arreglo[medio-1] < buscado){
-        return elemento;
+        return condicion ? elemento : arreglo[medio-1];
     }
-
-    return busqueda_menores(buscado,arreglo,inicio,medio);  
+    return busqueda_menores(buscado,arreglo,inicio,medio,condicion);
 }
 
 size_t aumentar_capacidad(hash_t *hash, size_t *primos, size_t n){
     size_t capacidad = hash->capacidad*2;
 
     if (capacidad <= primos[n-1]){
-        return busqueda_menores(capacidad,primos,0,n);
+        return busqueda_menores(capacidad,primos,0,n,AUMENTAR);
+    }
+
+    return busqueda_mayores(capacidad,0,40,capacidad);
+}
+
+size_t reducir_capacidad(hash_t *hash, size_t *primos, size_t n){
+    size_t capacidad = hash->capacidad/2;
+
+    if (capacidad <= primos[n-1]){
+        return busqueda_menores(capacidad,primos,0,n,!AUMENTAR);
     }
 
     return busqueda_mayores(capacidad,0,40,capacidad);

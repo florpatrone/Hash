@@ -105,12 +105,7 @@ campo_t *_hash_obtener(const hash_t* hash, const char *clave, size_t indice_bald
             continue;
         }
         if (borrar_nodo){
-            campo_t* campo_borrar = campo;
-            campo = campo_crear(strdup(campo->clave),campo->valor);
-            if (!campo) return NULL;
-        
-            lista_iter_borrar(iterador_lista);
-            campo_destruir(campo_borrar);
+            campo = lista_iter_borrar(iterador_lista);
         }
         lista_iter_destruir(iterador_lista);
         return campo;

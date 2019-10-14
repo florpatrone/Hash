@@ -167,32 +167,34 @@ bool hash_redimensionar_capacidad(hash_t *hash, size_t (*operacion) (hash_t*, si
     return false;
 }
 
-size_t busqueda_mayores(size_t buscado,size_t inicio,size_t fin,size_t elemento){
+size_t encontrar_primos(size_t m){
+    return (m*m) + m + 41;
+}
+
+size_t busqueda_mayores(size_t buscado,size_t inicio,size_t fin,bool condicion){
     size_t m = inicio + ((fin-inicio)/2);
-    size_t c = (m*m) + m + 41;
+    size_t e = encontrar_primos(m);
 
-    if (inicio >= fin){
-        return elemento;
+    if (e < buscado){
+        return busqueda_mayores(buscado,m+1,fin,condicion);
     }
-
-    if (c < buscado){
-        return busqueda_mayores(m+1,fin,buscado,elemento);
+    if (encontrar_primos(m-1) < buscado){
+        return condicion ? e : encontrar_primos(m-1);
     }
-
-    return busqueda_mayores(inicio,m,buscado,c);
+    return busqueda_mayores(buscado,inicio,m,condicion);
 }
 
 size_t busqueda_menores(size_t buscado, size_t* arreglo, size_t inicio, size_t fin, bool condicion){
-    size_t medio = inicio + ( (fin-inicio)/2);
-    size_t elemento = arreglo[medio];
+    size_t m = inicio + ( (fin-inicio)/2);
+    size_t e = arreglo[m];
 
-    if (elemento < buscado){
-        return busqueda_menores(buscado,arreglo,medio+1,fin,condicion);
+    if (e < buscado){
+        return busqueda_menores(buscado,arreglo,m+1,fin,condicion);
     }
-    if (arreglo[medio-1] < buscado){
-        return condicion ? elemento : arreglo[medio-1];
+    if (arreglo[m-1] < buscado){
+        return condicion ? e : arreglo[m-1];
     }
-    return busqueda_menores(buscado,arreglo,inicio,medio,condicion);
+    return busqueda_menores(buscado,arreglo,inicio,m,condicion);
 }
 
 size_t aumentar_capacidad(hash_t *hash, size_t *primos, size_t n){
@@ -202,7 +204,7 @@ size_t aumentar_capacidad(hash_t *hash, size_t *primos, size_t n){
         return busqueda_menores(capacidad,primos,0,n,AUMENTAR);
     }
 
-    return busqueda_mayores(capacidad,0,40,capacidad);
+    return busqueda_mayores(capacidad,0,40,AUMENTAR);
 }
 
 size_t reducir_capacidad(hash_t *hash, size_t *primos, size_t n){
@@ -212,7 +214,7 @@ size_t reducir_capacidad(hash_t *hash, size_t *primos, size_t n){
         return busqueda_menores(capacidad,primos,0,n,!AUMENTAR);
     }
 
-    return busqueda_mayores(capacidad,0,40,capacidad);
+    return busqueda_mayores(capacidad,0,40,!AUMENTAR);
 }
 
 lista_iter_t* hash_iter_crear_balde_iter(hash_iter_t* iter){

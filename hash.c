@@ -216,7 +216,10 @@ size_t reducir_capacidad(hash_t *hash, size_t *primos, size_t n){
         return busqueda_menores(capacidad,primos,0,n,!AUMENTAR);
     }
 
-    return busqueda_mayores(capacidad,0,40,!AUMENTAR);
+    if (capacidad > 41){
+        return busqueda_mayores(capacidad,0,40,!AUMENTAR);
+    }
+    return primos[n-1];
 }
 
 lista_iter_t* hash_iter_crear_balde_iter(hash_iter_t* iter){
@@ -300,6 +303,10 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato){
 void *hash_borrar(hash_t *hash, const char *clave){
     if (hash->cantidad == 0 || !clave){
         return NULL;
+    }
+
+    if ( (hash->capacidad > CAPACIDAD_INICIAL) && (hash->cantidad/hash->capacidad <= 0.25)) {
+        if (!hash_redimensionar_capacidad(hash,reducir_capacidad)) return NULL;
     }
 
     size_t largo_hash = hash->capacidad;

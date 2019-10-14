@@ -175,6 +175,8 @@ size_t busqueda_mayores(size_t buscado,size_t inicio,size_t fin,bool condicion){
     size_t m = inicio + ((fin-inicio)/2);
     size_t e = encontrar_primos(m);
 
+    if (e == 41) return e;
+
     if (e < buscado){
         return busqueda_mayores(buscado,m+1,fin,condicion);
     }

@@ -167,21 +167,18 @@ bool hash_redimensionar_capacidad(hash_t *hash, size_t (*operacion) (hash_t*, si
     return false;
 }
 
-size_t encontrar_primos(size_t m){
-    return (m*m) + m + 41;
-}
-
 size_t busqueda_mayores(size_t buscado,size_t inicio,size_t fin,bool condicion){
     size_t m = inicio + ((fin-inicio)/2);
-    size_t e = encontrar_primos(m);
+    size_t e = (m*m) + m + 41;
+    size_t e2 = (m-1*m-1) + m-1 + 41;
 
     if (e == 41) return e;
 
     if (e < buscado){
         return busqueda_mayores(buscado,m+1,fin,condicion);
     }
-    if (encontrar_primos(m-1) < buscado){
-        return condicion ? e : encontrar_primos(m-1);
+    if (e2 < buscado){
+        return condicion ? e : e2;
     }
     return busqueda_mayores(buscado,inicio,m,condicion);
 }

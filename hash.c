@@ -51,6 +51,8 @@ struct hash_iter{
 * Primitivas del Campo
 ****************************/
 
+/* Crea un campo.
+Pre: se le debe pasar una clave y un valor por parámetro.*/
 campo_t* campo_crear(char *clave, void *dato){
     campo_t* campo = malloc(sizeof(campo_t));
 
@@ -61,7 +63,8 @@ campo_t* campo_crear(char *clave, void *dato){
 
     return campo;
 }
-
+/* Destruye el campo.
+Pre: el campo debe haber sido creado.*/
 void campo_destruir(campo_t* campo){
     free(campo->clave);
     free(campo);
@@ -71,6 +74,8 @@ void campo_destruir(campo_t* campo){
 * Funciones auxiliares 
 ****************************/
 
+/* Función de hashing. Devuelve un número entre 0 y m (siendo m la capacidad del hash).
+Pre: recibe una clave y la cantidad del hash.*/
 size_t funcion_hash(const char *str, size_t cantidad) { //Utiliza el algoritmo 'djb2'
     size_t hash = 5381;
     int c;
@@ -81,11 +86,13 @@ size_t funcion_hash(const char *str, size_t cantidad) { //Utiliza el algoritmo '
     return hash%cantidad;
 }
 
+/* Devuelve el campo en el cual aparece la clave buscada.
+Pre: el hash debe haber sido creado. Se recibe por parámetro la variable bool borrar_nodo;
+si borrar_nodo es true, se borra el nodo en el que se encuentra el campo.
+La clave debe ser distinta de NULL.
+Post: dependiendo de bool borrar_nodo true o false, se borra o no el campo. */
 campo_t *_hash_obtener(const hash_t* hash, const char *clave, size_t indice_balde, bool borrar_nodo){
-    if (!clave){
-        return NULL;
-    }
-    
+
     if (hash->capacidad == indice_balde){         // Si ya recorrí toda la lista
         return NULL;
     }
@@ -114,16 +121,26 @@ campo_t *_hash_obtener(const hash_t* hash, const char *clave, size_t indice_bald
     return _hash_obtener(hash, clave, ++indice_balde, borrar_nodo);
 }
 
-void pre_setear_lista(lista_t** lista, size_t n){
+/* Pre setea el arreglo tal que en todas sus 
+posiciones se encuentre NULL.
+Pre: El arreglo debe existir.
+Post: En todas sus posiciones hay NULL. */
+void pre_setear_arreglo(lista_t** lista, size_t n){
     for (size_t i = 0; i < n; i++){
         lista[i] = NULL;
     }    
 }
 
+/* Transfiere los datos del arreglo del hash con la capacidad vieja
+a un nuevo arreglo de hash con la capacidad nueva pasada por parámetro,
+borrando los que se encuentran vacíos.
+Pre: el hash debe existir.
+Post: El hash tiene una nueva capacidad y se han eliminado
+los baldes vacíos.*/
 bool transferir_datos(hash_t* hash, size_t nueva_capacidad){
     lista_t** baldes = malloc(sizeof(lista_t*)*nueva_capacidad);
     if (!baldes) return false;
-    pre_setear_lista(baldes,nueva_capacidad);
+    pre_setear_arreglo(baldes,nueva_capacidad);
     
     for (size_t i = 0; i < hash->capacidad; i++){
         lista_t* lista_hash_orig = hash->baldes[i];
@@ -154,6 +171,9 @@ bool transferir_datos(hash_t* hash, size_t nueva_capacidad){
     return true;
 }
 
+/* Redimensiona la capacidad del hash.
+Pre: el hash debe haber sido creado.
+Post: El hash tiene una nueva capacidad que es un número primo. */
 bool hash_redimensionar_capacidad(hash_t *hash, size_t (*operacion) (hash_t*, size_t*, size_t)){
     size_t primos[] = {2, 3, 5, 7, 11 , 13, 17 ,19, 23, 29, 31, 37};
     size_t n = 12;
@@ -166,9 +186,10 @@ bool hash_redimensionar_capacidad(hash_t *hash, size_t (*operacion) (hash_t*, si
     return false;
 }
 
+/*  */
 size_t busqueda_mayores(size_t buscado,size_t inicio,size_t fin,bool condicion){
     size_t m = inicio + ((fin-inicio)/2);
-    size_t actual = (m*m) + m + 41;
+    size_t actual = (m*m) + m + 41;                 // formula para conseguir primos desde el 41 hasta el 1601 (Wikipedia)
     size_t anterior = (m-1*m-1) + m-1 + 41;
 
     if (actual < buscado){
@@ -180,6 +201,7 @@ size_t busqueda_mayores(size_t buscado,size_t inicio,size_t fin,bool condicion){
     return busqueda_mayores(buscado,inicio,m,condicion);
 }
 
+/*  */
 size_t busqueda_menores(size_t buscado, size_t* arreglo, size_t inicio, size_t fin, bool condicion){
     size_t m = inicio + ( (fin-inicio)/2);
     size_t actual = arreglo[m];
@@ -194,6 +216,7 @@ size_t busqueda_menores(size_t buscado, size_t* arreglo, size_t inicio, size_t f
     return busqueda_menores(buscado,arreglo,inicio,m,condicion);
 }
 
+/* Aumenta la capacidad buscando el número primo correspondiente. */
 size_t aumentar_capacidad(hash_t *hash, size_t *primos, size_t n){
     size_t capacidad = hash->capacidad*CTE_AUMENTO;
 
@@ -206,6 +229,7 @@ size_t aumentar_capacidad(hash_t *hash, size_t *primos, size_t n){
     return 41;
 }
 
+/* Disminuye la capacidad buscando el número primo correspondiente. */
 size_t reducir_capacidad(hash_t *hash, size_t *primos, size_t n){
     size_t capacidad = hash->capacidad/CTE_REDUCCION;
 
@@ -218,6 +242,10 @@ size_t reducir_capacidad(hash_t *hash, size_t *primos, size_t n){
     return primos[n-1];
 }
 
+/* Crea un iterador a partir de la primer lista no vacía que se encuentre
+en el arreglo del hash. 
+Pre: el hash debe haber sido creado. 
+Post: se devuelve un iterador inicializado en una lista del hash. */
 lista_iter_t* hash_iter_crear_balde_iter(hash_iter_t* iter){
     lista_t** baldes = iter->hash->baldes;
     size_t* actual = &(iter->balde_actual);
@@ -248,7 +276,7 @@ hash_t *hash_crear(void (*destruir_dato)(void*)){
         return NULL;
     }
     hash->baldes = baldes;
-    pre_setear_lista(hash->baldes,CAPACIDAD_INICIAL);
+    pre_setear_arreglo(hash->baldes,CAPACIDAD_INICIAL);
 
     hash->capacidad = CAPACIDAD_INICIAL;
     hash->cantidad = 0;
@@ -264,7 +292,7 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato){
     size_t num_hash = funcion_hash(clave,hash->capacidad);
     campo_t* campo = _hash_obtener(hash,clave,num_hash,!BORRAR_NODO);
 
-    if (campo != NULL){
+    if (campo != NULL){             // Si se desea actualizar el valor de una clave
         if (hash->destruir_dato) hash->destruir_dato(campo->valor);
         campo->valor = dato;
         return true;

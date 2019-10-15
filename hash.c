@@ -14,14 +14,14 @@
 #define CRITERIO_REDUCCION 4
 
 /* Definiciones previas:
-    Baldes: lista enlazada que en sus nodos contiene como dato un puntero a otra lista enlazada.
-            Los baldes tendrán índices del 0 a m (siendo m el largo del hash).
+    Baldes: posiciones de un arreglo que contienen un puntero a una lista enlazada.
+            Los baldes tendrán índices del 0 a m (siendo m el largo del arreglo del hash).
     
     Listas: listas enlazadas apuntadas por el puntero del balde en un determinado índice.
     Ej: balde en la posición 3 tiene un puntero que señala a una lista enlazada donde se encuentra, en cada nodo,
-        una clave para la cual la función de hashing devolvió un 3 y su respectivo valor.
+        una clave (para la cual la función de hashing devolvió un 3) y su respectivo valor.
 
-    Iterador_hash: itera la lista enlazada de baldes con punteros.
+    Iterador_hash: itera  el arreglo de baldes con punteros.
     Iterador_lista: itera la lista enlazada que se encuentra dentro del balde elegido.
 */
 

@@ -186,7 +186,9 @@ bool hash_redimensionar_capacidad(hash_t *hash, size_t (*operacion) (hash_t*, si
     return false;
 }
 
-/*  */
+/*Busca y devuelve el numero primo mas cercano a otro numero mayor o igual a 41.
+Pre: recibe un numero mayor o igual a 41 en caso de que la condicion sea 'false', mayor estricto en caso de 'true';
+*/
 size_t busqueda_mayores(size_t buscado,size_t inicio,size_t fin,bool condicion){
     size_t m = inicio + ((fin-inicio)/2);
     size_t actual = (m*m) + m + 41;                 // formula para conseguir primos desde el 41 hasta el 1601 (Wikipedia)
@@ -201,7 +203,9 @@ size_t busqueda_mayores(size_t buscado,size_t inicio,size_t fin,bool condicion){
     return busqueda_mayores(buscado,inicio,m,condicion);
 }
 
-/*  */
+/*Busca y devuelve el numero primo mas cercano a otro numero menor a 37.
+Pre: Recibe un arreglo ordenado de numeros primos menores a 41 y un numero menor a 37.
+*/
 size_t busqueda_menores(size_t buscado, size_t* arreglo, size_t inicio, size_t fin, bool condicion){
     size_t m = inicio + ( (fin-inicio)/2);
     size_t actual = arreglo[m];
